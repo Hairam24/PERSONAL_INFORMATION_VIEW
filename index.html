@@ -24,21 +24,28 @@
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     .user-item {
-      display: flex;
-      justify-content: space-between;
-      padding: 1rem;
-      border-bottom: 1px solid #ddd;
+      margin-bottom: 1rem;
     }
-    button {
-      padding: 0.5rem 1rem;
+    .user-name-btn {
+      padding: 0.75rem 1rem;
+      width: 100%;
       background-color: #007bff;
       color: white;
       border: none;
       border-radius: 5px;
+      text-align: left;
+      font-size: 1rem;
       cursor: pointer;
     }
-    button:hover {
+    .user-name-btn:hover {
       background-color: #0056b3;
+    }
+    .user-details {
+      margin-top: 0.5rem;
+      padding: 0.75rem;
+      border-left: 4px solid #007bff;
+      background-color: #f9f9f9;
+      display: none;
     }
   </style>
 </head>
@@ -46,11 +53,11 @@
 
   <div class="user-list" id="user-list">
     <h2>User Information</h2>
-    <!-- User info will be displayed here -->
+    <!-- User info will be dynamically inserted here -->
   </div>
 
   <script>
-    // Your Firebase config
+    // Firebase config
     const firebaseConfig = {
       apiKey: "AIzaSyCmLnY00MUdJBe8fL2IRYj1_sYicwDLFFM",
       authDomain: "personal-information-1b6b2.firebaseapp.com",
@@ -62,47 +69,49 @@
       measurementId: "G-C4JS5H90C2"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Reference to the 'users' data
     const usersRef = db.ref('users');
 
-    // Get all user data
     usersRef.on('value', (snapshot) => {
       const userList = snapshot.val();
       const userListContainer = document.getElementById('user-list');
-      userListContainer.innerHTML = '<h2>User Information</h2>'; // Reset the list content
+      userListContainer.innerHTML = '<h2>User Information</h2>';
 
       if (userList) {
         Object.keys(userList).forEach(userId => {
           const userData = userList[userId];
           const userElement = document.createElement('div');
           userElement.classList.add('user-item');
-          userElement.innerHTML = `
-            <div>
-              <strong>Name:</strong> ${userData.name} <br>
-              <strong>Email:</strong> ${userData.email} <br>
-              <strong>Phone:</strong> ${userData.phone} <br>
-              <strong>Address:</strong> ${userData.address} <br>
-              <strong>Education:</strong> ${userData.education} <br>
-              <strong>DOB:</strong> ${userData.dob}
-            </div>
-            <button onclick="editUser('${userId}')">Edit</button>
+
+          const nameButton = document.createElement('button');
+          nameButton.classList.add('user-name-btn');
+          nameButton.textContent = userData.name;
+
+          const detailsDiv = document.createElement('div');
+          detailsDiv.classList.add('user-details');
+          detailsDiv.innerHTML = `
+            <strong>Email:</strong> ${userData.email} <br>
+            <strong>Phone:</strong> ${userData.phone} <br>
+            <strong>Address:</strong> ${userData.address} <br>
+            <strong>Education:</strong> ${userData.education} <br>
+            <strong>DOB:</strong> ${userData.dob}
           `;
+
+          // Toggle details visibility on name button click
+          nameButton.addEventListener('click', () => {
+            detailsDiv.style.display = detailsDiv.style.display === 'none' ? 'block' : 'none';
+          });
+
+          userElement.appendChild(nameButton);
+          userElement.appendChild(detailsDiv);
           userListContainer.appendChild(userElement);
         });
       } else {
-        userListContainer.innerHTML = '<p>No users found.</p>';
+        userListContainer.innerHTML += '<p>No users found.</p>';
       }
     });
-
-    // Function to handle editing a user (you can implement this further)
-    function editUser(userId) {
-      alert("Edit functionality for user: " + userId);
-      // You can add logic to edit user data here (e.g., navigate to another page or open a modal)
-    }
   </script>
 
 </body>
